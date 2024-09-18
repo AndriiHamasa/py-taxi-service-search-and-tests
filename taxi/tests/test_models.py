@@ -14,21 +14,25 @@ class ModelTests(TestCase):
             first_name="test_first_name",
             last_name="test_last_name",
         )
-        manufacturer = Manufacturer.objects.create(name="test_manufacturer", country="test_country")
+        manufacturer = Manufacturer.objects.create(
+            name="test_manufacturer", country="test_country"
+        )
         car = Car.objects.create(model="test_model", manufacturer=manufacturer)
         car.drivers.add(driver)
 
-
     def test_driver_str_method(self):
         driver = get_user_model().objects.get(username="test_user")
-        return self.assertEqual(str(driver), f"{driver.username} ({driver.first_name} {driver.last_name})")
+        return self.assertEqual(
+            str(driver),
+            f"{driver.username} ({driver.first_name} {driver.last_name})"
+        )
 
     def test_driver_absolute_url(self):
         driver = get_user_model().objects.get(username="test_user")
         self.assertEqual(driver.get_absolute_url(), f"/drivers/{driver.id}/")
 
     def test_create_driver_with_license_number(self):
-        license_number = "TST00000",
+        license_number = ("TST00000",)
         password = "test_password_2"
         driver = get_user_model().objects.get(username="test_user")
         driver.license_number = license_number
@@ -39,9 +43,10 @@ class ModelTests(TestCase):
 
     def test_manufacturer_str_method(self):
         manufacturer = Manufacturer.objects.get(name="test_manufacturer")
-        self.assertEqual(str(manufacturer), f"{manufacturer.name} {manufacturer.country}")
+        self.assertEqual(
+            str(manufacturer), f"{manufacturer.name} {manufacturer.country}"
+        )
 
     def test_car_str_method(self):
         car = Car.objects.get(model="test_model")
         self.assertEqual(str(car), car.model)
-

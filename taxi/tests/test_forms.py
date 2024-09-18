@@ -1,12 +1,18 @@
 from django.test import TestCase
 
 from django import forms
-from taxi.forms import DriverLicenseUpdateForm, DriverCreationForm, CarForm, DriverUsernameSearchForm, \
-    CarModelSearchForm, ManufacturerNameSearchForm
+from taxi.forms import (
+    DriverLicenseUpdateForm,
+    DriverCreationForm,
+    CarForm,
+    DriverUsernameSearchForm,
+    CarModelSearchForm,
+    ManufacturerNameSearchForm,
+)
 
 
 class FormTests(TestCase):
-    def test_driver_creation_form_with_license_number_first_last_name_is_valid(self):
+    def test_driver_creation_form_is_valid(self):
         form_data = {
             "username": "test_user",
             "password1": "2wsxvfr4",
@@ -51,22 +57,34 @@ class FormTests(TestCase):
 
     def test_car_form_field_widget(self):
         form = CarForm()
-        self.assertIsInstance(form.fields["drivers"].widget, forms.CheckboxSelectMultiple)
+        self.assertIsInstance(
+            form.fields["drivers"].widget, forms.CheckboxSelectMultiple
+        )
 
     def test_driver_search_form_field_widget(self):
         form = DriverUsernameSearchForm()
-        print("form.fields['username']: ", form.fields["username"].widget.attrs["placeholder"])
+        print(
+            "form.fields['username']: ",
+            form.fields["username"].widget.attrs["placeholder"],
+        )
         self.assertIsInstance(form.fields["username"].widget, forms.TextInput)
-        self.assertEqual(form.fields["username"].widget.attrs["placeholder"], "Search by username")
+        self.assertEqual(
+            form.fields["username"].widget.attrs["placeholder"],
+            "Search by username"
+        )
 
     def test_car_search_form_field_widget(self):
         form = CarModelSearchForm()
 
         self.assertIsInstance(form.fields["model"].widget, forms.TextInput)
-        self.assertEqual(form.fields["model"].widget.attrs["placeholder"], "Search by model")
+        self.assertEqual(
+            form.fields["model"].widget.attrs["placeholder"], "Search by model"
+        )
 
     def test_manufacturer_search_form_field_widget(self):
         form = ManufacturerNameSearchForm()
 
         self.assertIsInstance(form.fields["name"].widget, forms.TextInput)
-        self.assertEqual(form.fields["name"].widget.attrs["placeholder"], "Search by name")
+        self.assertEqual(
+            form.fields["name"].widget.attrs["placeholder"], "Search by name"
+        )

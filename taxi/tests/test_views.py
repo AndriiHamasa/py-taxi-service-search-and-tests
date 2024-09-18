@@ -6,6 +6,7 @@ from taxi.models import Driver, Manufacturer, Car
 
 MANUFACTURER_LIST_URL = reverse("taxi:manufacturer-list")
 
+
 class PublicManufacturerTest(TestCase):
     def test_login_required(self):
         res = self.client.get(MANUFACTURER_LIST_URL)
@@ -15,7 +16,7 @@ class PublicManufacturerTest(TestCase):
 class PrivateManufacturerTest(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            username='test_user',
+            username="test_user",
             password="test1234",
         )
         self.client.force_login(self.user)
@@ -28,8 +29,7 @@ class PrivateManufacturerTest(TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(
-            list(res.context["manufacturer_list"]),
-            list(manufacturer_list)
+            list(res.context["manufacturer_list"]), list(manufacturer_list)
         )
         self.assertTemplateUsed(res, "taxi/manufacturer_list.html")
 
@@ -38,9 +38,16 @@ class PrivateManufacturerTest(TestCase):
         Manufacturer.objects.create(name="test1", country="test")
         Manufacturer.objects.create(name="test2", country="test")
 
-        response = self.client.get(MANUFACTURER_LIST_URL + f"?name={search_word}")
-        manufacturer_list = Manufacturer.objects.filter(name__icontains=search_word)
-        self.assertEqual(list(response.context["manufacturer_list"]), list(manufacturer_list))
+        response = self.client.get(
+            MANUFACTURER_LIST_URL + f"?name={search_word}"
+        )
+        manufacturer_list = Manufacturer.objects.filter(
+            name__icontains=search_word
+        )
+        self.assertEqual(
+            list(response.context["manufacturer_list"]),
+            list(manufacturer_list)
+        )
 
     def test_manufacturer_create(self):
         form_data = {
@@ -48,7 +55,10 @@ class PrivateManufacturerTest(TestCase):
             "country": "test",
         }
 
-        response = self.client.post(reverse("taxi:manufacturer-create"), form_data)
+        response = self.client.post(
+            reverse("taxi:manufacturer-create"),
+            form_data
+        )
         new_manufacturer = Manufacturer.objects.get(name=form_data["name"])
 
         self.assertEqual(new_manufacturer.name, form_data["name"])
@@ -57,19 +67,33 @@ class PrivateManufacturerTest(TestCase):
         self.assertRedirects(response, reverse("taxi:manufacturer-list"))
 
     def test_manufacturer_update(self):
-        manufacturer = Manufacturer.objects.create(name="test1", country="test")
+        manufacturer = Manufacturer.objects.create(
+            name="test1",
+            country="test"
+        )
         change_data = {
             "name": "test2",
             "country": "test2",
         }
-        response = self.client.post(reverse("taxi:manufacturer-update", kwargs={"pk": manufacturer.id}), change_data)
+        response = self.client.post(
+            reverse(
+                "taxi:manufacturer-update",
+                kwargs={"pk": manufacturer.id}
+            ),
+            change_data,
+        )
         self.assertTrue(len(Manufacturer.objects.filter(name="test1")) == 0)
         self.assertRedirects(response, reverse("taxi:manufacturer-list"))
 
     def test_manufacturer_delete(self):
 
         manufacturer = Manufacturer.objects.create(name="test", country="test")
-        response = self.client.post(reverse("taxi:manufacturer-delete", kwargs={"pk": manufacturer.id}))
+        response = self.client.post(
+            reverse(
+                "taxi:manufacturer-delete",
+                kwargs={"pk": manufacturer.id}
+            )
+        )
 
         self.assertTrue(len(Manufacturer.objects.filter(name="test")) == 0)
         self.assertRedirects(response, reverse("taxi:manufacturer-list"))
@@ -78,7 +102,7 @@ class PrivateManufacturerTest(TestCase):
 class PrivateDriverTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            username='test_user',
+            username="test_user",
             password="test1234",
         )
         self.client.force_login(self.user)
@@ -101,45 +125,86 @@ class PrivateDriverTests(TestCase):
         self.assertEqual(new_user.last_name, form_data["last_name"])
         self.assertEqual(new_user.license_number, form_data["license_number"])
 
-        self.assertRedirects(response, reverse("taxi:driver-detail", kwargs={"pk": new_user.id}))
+        self.assertRedirects(
+            response, reverse(
+                "taxi:driver-detail",
+                kwargs={"pk": new_user.id}
+            )
+        )
 
     def test_license_update_driver(self):
-        driver = get_user_model().objects.create_user(username='test', password="12345678", license_number="TST00000")
+        driver = get_user_model().objects.create_user(
+            username="test", password="12345678", license_number="TST00000"
+        )
         change_data = {
             "license_number": "QWE12345",
         }
-        response = self.client.post(reverse("taxi:driver-update", kwargs={"pk": driver.id}), change_data)
-        self.assertTrue(len(get_user_model().objects.filter(license_number="TST00000")) == 0)
+        response = self.client.post(
+            reverse(
+                "taxi:driver-update",
+                kwargs={"pk": driver.id}
+            ),
+            change_data
+        )
+        self.assertTrue(
+            len(
+                get_user_model().objects.filter(license_number="TST00000")
+            ) == 0
+        )
         self.assertRedirects(response, reverse("taxi:driver-list"))
 
     def test_delete_driver(self):
-        driver = get_user_model().objects.create_user(username="test", password="12345678", license_number="TST00000")
-        response = self.client.post(reverse("taxi:driver-delete", kwargs={"pk": driver.id}))
+        driver = get_user_model().objects.create_user(
+            username="test", password="12345678", license_number="TST00000"
+        )
+        response = self.client.post(
+            reverse("taxi:driver-delete", kwargs={"pk": driver.id})
+        )
 
-        self.assertTrue(len(get_user_model().objects.filter(username="test")) == 0)
+        self.assertTrue(
+            len(get_user_model().objects.filter(username="test")) == 0
+        )
         self.assertRedirects(response, reverse("taxi:driver-list"))
 
     def test_retrieve_filtered_driver_list(self):
         search_word = "bor"
-        get_user_model().objects.create(username="test1", password="test", license_number="TST00000")
-        get_user_model().objects.create(username="bora", password="test", license_number="TST00001")
+        get_user_model().objects.create(
+            username="test1", password="test", license_number="TST00000"
+        )
+        get_user_model().objects.create(
+            username="bora", password="test", license_number="TST00001"
+        )
 
-        response = self.client.get(reverse("taxi:driver-list") + f"?username={search_word}")
-        driver_list = get_user_model().objects.filter(username__icontains=search_word)
-        self.assertEqual(list(response.context["driver_list"]), list(driver_list))
+        response = self.client.get(
+            reverse("taxi:driver-list") + f"?username={search_word}"
+        )
+        driver_list = get_user_model().objects.filter(
+            username__icontains=search_word
+        )
+        self.assertEqual(
+            list(response.context["driver_list"]),
+            list(driver_list)
+        )
 
 
 class PrivateCarTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            username='test_user',
+            username="test_user",
             password="test1234",
         )
         self.client.force_login(self.user)
 
     def test_create_car(self):
-        manufacturer = Manufacturer.objects.create(name="test", country="test")
-        driver = get_user_model().objects.create_user(username="test", password="12345678", license_number="TST00000")
+        manufacturer = Manufacturer.objects.create(
+            name="test",
+            country="test"
+        )
+        driver = get_user_model().objects.create_user(
+            username="test",
+            password="12345678",
+            license_number="TST00000"
+        )
         form_data = {
             "model": "e60",
             "manufacturer": manufacturer.id,
@@ -158,12 +223,19 @@ class PrivateCarTests(TestCase):
     def test_update_car(self):
 
         manufacturer = Manufacturer.objects.create(name="test", country="test")
-        driver = get_user_model().objects.create_user(username="test", password="12345678", license_number="TST00000")
+        driver = get_user_model().objects.create_user(
+            username="test", password="12345678", license_number="TST00000"
+        )
         car = Car.objects.create(model="test_model", manufacturer=manufacturer)
         car.drivers.add(driver)
 
-        new_manufacturer = Manufacturer.objects.create(name="test2", country="test2")
-        new_driver = get_user_model().objects.create_user(username="test2", password="12345678", license_number="TST00001")
+        new_manufacturer = Manufacturer.objects.create(
+            name="test2",
+            country="test2"
+        )
+        new_driver = get_user_model().objects.create_user(
+            username="test2", password="12345678", license_number="TST00001"
+        )
 
         change_data = {
             "model": "notest_model",
@@ -171,7 +243,9 @@ class PrivateCarTests(TestCase):
             "drivers": new_driver.id,
         }
 
-        response = self.client.post(reverse("taxi:car-update", kwargs={"pk": car.id}), change_data)
+        response = self.client.post(
+            reverse("taxi:car-update", kwargs={"pk": car.id}), change_data
+        )
 
         car.refresh_from_db()
 
@@ -180,43 +254,86 @@ class PrivateCarTests(TestCase):
 
     def test_delete_car(self):
         manufacturer = Manufacturer.objects.create(name="test", country="test")
-        driver = get_user_model().objects.create_user(username="test", password="12345678", license_number="TST00000")
+        driver = get_user_model().objects.create_user(
+            username="test", password="12345678", license_number="TST00000"
+        )
         car = Car.objects.create(model="test_model", manufacturer=manufacturer)
         car.drivers.add(driver)
 
-        response = self.client.post(reverse("taxi:car-delete", kwargs={"pk": car.id}))
+        response = self.client.post(reverse(
+            "taxi:car-delete",
+            kwargs={"pk": car.id})
+        )
 
         self.assertTrue(len(Car.objects.filter(model="test_model")) == 0)
         self.assertRedirects(response, reverse("taxi:car-list"))
 
     def test_retrieve_filtered_car_list(self):
         search_word = "bor"
-        manufacturer_first = Manufacturer.objects.create(name="test1", country="test")
-        driver_first = get_user_model().objects.create_user(username="test1", password="12345678", license_number="TST00000")
+        manufacturer_first = Manufacturer.objects.create(
+            name="test1",
+            country="test"
+        )
+        driver_first = get_user_model().objects.create_user(
+            username="test1",
+            password="12345678",
+            license_number="TST00000"
+        )
 
-        manufacturer_second = Manufacturer.objects.create(name="test2", country="test")
-        driver_second = get_user_model().objects.create_user(username="test2", password="12345678", license_number="TST00001")
+        manufacturer_second = Manufacturer.objects.create(
+            name="test2",
+            country="test"
+        )
+        driver_second = get_user_model().objects.create_user(
+            username="test2", password="12345678", license_number="TST00001"
+        )
 
-        car_first = Car.objects.create(model="bora", manufacturer=manufacturer_first)
+        car_first = Car.objects.create(
+            model="bora",
+            manufacturer=manufacturer_first
+        )
         car_first.drivers.add(driver_first)
-        car_second = Car.objects.create(model="test_model", manufacturer=manufacturer_second)
+        car_second = Car.objects.create(
+            model="test_model", manufacturer=manufacturer_second
+        )
         car_second.drivers.add(driver_second)
 
-        response = self.client.get(reverse("taxi:car-list") + f"?model={search_word}")
+        response = self.client.get(
+            reverse("taxi:car-list") + f"?model={search_word}"
+        )
         car_list = Car.objects.filter(model__icontains=search_word)
 
         self.assertEqual(list(response.context["car_list"]), list(car_list))
 
     def test_retrieve_car_list(self):
-        manufacturer_first = Manufacturer.objects.create(name="test1", country="test")
-        driver_first = get_user_model().objects.create_user(username="test1", password="12345678", license_number="TST00000")
+        manufacturer_first = Manufacturer.objects.create(
+            name="test1",
+            country="test"
+        )
+        driver_first = get_user_model().objects.create_user(
+            username="test1",
+            password="12345678",
+            license_number="TST00000"
+        )
 
-        manufacturer_second = Manufacturer.objects.create(name="test2", country="test")
-        driver_second = get_user_model().objects.create_user(username="test2", password="12345678", license_number="TST00001")
+        manufacturer_second = Manufacturer.objects.create(
+            name="test2",
+            country="test"
+        )
+        driver_second = get_user_model().objects.create_user(
+            username="test2",
+            password="12345678",
+            license_number="TST00001"
+        )
 
-        car_first = Car.objects.create(model="bora", manufacturer=manufacturer_first)
+        car_first = Car.objects.create(
+            model="bora",
+            manufacturer=manufacturer_first
+        )
         car_first.drivers.add(driver_first)
-        car_second = Car.objects.create(model="test_model", manufacturer=manufacturer_second)
+        car_second = Car.objects.create(
+            model="test_model", manufacturer=manufacturer_second
+        )
         car_second.drivers.add(driver_second)
 
         response = self.client.get(reverse("taxi:car-list"))
